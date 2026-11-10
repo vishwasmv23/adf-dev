@@ -33,7 +33,7 @@
 				}
 			},
 			{
-				"name": "ExecutePipeline",
+				"name": "EXEC_SQL_Incremental_Load",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -52,7 +52,7 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "EXEC_SQL_Incremental_Load",
+							"name": "ExecutePipeline",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"policy": {
@@ -66,12 +66,30 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"p_ConfigId": "p_ConfigId\n@item().ConfigId",
-									"p_SourceSchema": "p_SourceSchema\n@item().SourceSchema",
-									"p_SourceTable": "p_SourceTable\n@item().SourceTable",
-									"p_WatermarkColumn": "p_WatermarkColumn\n@item().WatermarkColumn",
-									"p_LastWatermarkValue": "p_LastWatermarkValue\n@string(item().LastWatermarkValue)",
-									"p_TargetFolder": "p_TargetFolder\n@item().TargetFolder"
+									"p_ConfigId": {
+										"value": "@item().ConfigId",
+										"type": "Expression"
+									},
+									"p_SourceSchema": {
+										"value": "@item().SourceSchema",
+										"type": "Expression"
+									},
+									"p_SourceTable": {
+										"value": "@item().SourceTable",
+										"type": "Expression"
+									},
+									"p_WatermarkColumn": {
+										"value": "@item().WatermarkColumn",
+										"type": "Expression"
+									},
+									"p_LastWatermarkValue": {
+										"value": "@if(\n    equals(item().LastWatermarkValue, null),\n    '',\n    string(item().LastWatermarkValue)\n)",
+										"type": "Expression"
+									},
+									"p_TargetFolder": {
+										"value": "@item().TargetFolder\n",
+										"type": "Expression"
+									}
 								}
 							}
 						}
