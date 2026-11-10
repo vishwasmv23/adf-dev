@@ -1,0 +1,48 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adfdevmvproject"
+		},
+		"ADLS_SQL_PARQUET_connectionString": {
+			"value": ""
+		},
+		"LS_ONPrem_SqlServer_DW_password": {
+			"value": ""
+		},
+		"LS_Parent_Sql_Server_DW_password": {
+			"value": ""
+		},
+		"LS_SQLSERVER_DB_password": {
+			"value": ""
+		},
+		"LS_ONPrem_SqlServer_DW_properties_typeProperties_server": {
+			"value": "DESKTOP-BB32KR9\\SQLEXPRESS"
+		},
+		"LS_ONPrem_SqlServer_DW_properties_typeProperties_database": {
+			"value": "sqlmigration"
+		},
+		"LS_ONPrem_SqlServer_DW_properties_typeProperties_userName": {
+			"value": "mv_admin"
+		},
+		"LS_Parent_Sql_Server_DW_properties_typeProperties_server": {
+			"value": "DESKTOP-BB32KR9\\SQLEXPRESS"
+		},
+		"LS_Parent_Sql_Server_DW_properties_typeProperties_database": {
+			"value": "sqlmigration"
+		},
+		"LS_Parent_Sql_Server_DW_properties_typeProperties_userName": {
+			"value": "mv_admin"
+		},
+		"LS_SQLSERVER_DB_properties_typeProperties_server": {
+			"value": "DESKTOP-BB32KR9\\SQLEXPRESS"
+		},
+		"LS_SQLSERVER_DB_properties_typeProperties_database": {
+			"value": "sqlmigration"
+		},
+		"LS_SQLSERVER_DB_properties_typeProperties_userName": {
+			"value": "mv_admin"
+		}
+	}
+}
