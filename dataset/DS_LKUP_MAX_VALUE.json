@@ -1,0 +1,21 @@
+{
+	"name": "DS_LKUP_MAX_VALUE",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Parent_Sql_Server_DW",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SchemaName": {
+				"type": "string"
+			},
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

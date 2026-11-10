@@ -1,0 +1,13 @@
+{
+	"name": "DS_SQLSERVER_TBLLKUP",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQLSERVER_DB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

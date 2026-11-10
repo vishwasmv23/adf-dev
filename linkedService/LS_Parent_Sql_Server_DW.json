@@ -1,0 +1,21 @@
+{
+	"name": "LS_Parent_Sql_Server_DW",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"server": "DESKTOP-BB32KR9\\SQLEXPRESS",
+			"database": "sqlmigration",
+			"encrypt": "mandatory",
+			"trustServerCertificate": true,
+			"authenticationType": "SQL",
+			"userName": "mv_admin",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4Yzg0MzkwZC1iYjhlLTRmNjktYTEzNS0yZjI4NmZjMWU5NGUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "selfhostintegrationRuntime1",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
