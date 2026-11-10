@@ -1,0 +1,42 @@
+{
+	"name": "DS_ADLS_Bronze_Parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"p_Container": {
+				"type": "string",
+				"defaultValue": "adlsmvproject"
+			},
+			"p_TargetFolder": {
+				"type": "string"
+			},
+			"p_TableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat(\n    dataset().p_TableName,\n    '_',\n    formatDateTime(utcNow(),'yyyyMMddHHmmss'),\n    '.parquet'\n)\n",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@concat(\n    'bronze/',\n    dataset().p_TargetFolder,\n    '/',\n    formatDateTime(utcNow(),'yyyy/MM/dd')\n)",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().p_Container",
+					"type": "Expression"
+				}
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}

@@ -1,6 +1,84 @@
 {
-	"name": "pipeline1",
+	"name": "PL_SaaS_Master",
 	"properties": {
+		"activities": [
+			{
+				"name": "LKUP_Active_Table_Config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT\n    ConfigId,\n    SourceSchema,\n    SourceTable,\n    WatermarkColumn,\n    LastWatermarkValue,\n    TargetFolder\nFROM etl.PipelineConfig\nWHERE IsActive = 1;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_SchemaName": "etl",
+							"p_TableName": "PipelineConfig"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ExecutePipeline",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LKUP_Active_Table_Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKUP_Active_Table_Config').output.value\r\n",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "EXEC_SQL_Incremental_Load",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_SQL_Incremental_Load",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"p_ConfigId": "p_ConfigId\n@item().ConfigId",
+									"p_SourceSchema": "p_SourceSchema\n@item().SourceSchema",
+									"p_SourceTable": "p_SourceTable\n@item().SourceTable",
+									"p_WatermarkColumn": "p_WatermarkColumn\n@item().WatermarkColumn",
+									"p_LastWatermarkValue": "p_LastWatermarkValue\n@string(item().LastWatermarkValue)",
+									"p_TargetFolder": "p_TargetFolder\n@item().TargetFolder"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
 		"annotations": []
 	}
 }

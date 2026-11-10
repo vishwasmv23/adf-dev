@@ -1,0 +1,199 @@
+{
+	"name": "PL_SQL_Incremental_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKUP_Current_Max_Watermark",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "@concat(\n    'SELECT MAX(',\n    pipeline().parameters.p_WatermarkColumn,\n    ') AS MaxWatermark FROM ',\n    pipeline().parameters.p_SourceSchema,\n    '.',\n    pipeline().parameters.p_SourceTable\n)",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_SchemaName": {
+								"value": "@pipeline().parameters.p_SourceSchema",
+								"type": "Expression"
+							},
+							"p_TableName": {
+								"value": "@pipeline().parameters.p_SourceTable",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "IF_New_Data_Exists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "LKUP_Current_Max_Watermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(\n    empty(pipeline().parameters.p_LastWatermarkValue),\n    greater(\n        string(activity('LKUP_Current_Max_Watermark').output.firstRow.MaxWatermark),\n        pipeline().parameters.p_LastWatermarkValue\n    )\n)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "CPY_SQL_TO_BRONZE",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "@concat(\n    'SELECT * FROM ',\n    pipeline().parameters.p_SourceSchema,\n    '.',\n    pipeline().parameters.p_SourceTable,\n    if(\n        empty(pipeline().parameters.p_LastWatermarkValue),\n        '',\n        concat(\n            ' WHERE ',\n            pipeline().parameters.p_WatermarkColumn,\n            ' > ''',\n            pipeline().parameters.p_LastWatermarkValue,\n            ''' AND ',\n            pipeline().parameters.p_WatermarkColumn,\n            ' <= ''',\n            string(activity('LKUP_Current_Max_Watermark').output.firstRow.MaxWatermark),\n            ''''\n        )\n    )\n)\n",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_SQL_Source",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_SchemaName": {
+											"value": "@pipeline().parameters.p_SourceSchema",
+											"type": "Expression"
+										},
+										"p_TableName": {
+											"value": "@pipeline().parameters.p_SourceTable",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADLS_Bronze_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_Container": "adlsmvproject",
+										"p_TargetFolder": {
+											"value": "@pipeline().parameters.p_TargetFolder",
+											"type": "Expression"
+										},
+										"p_TableName": {
+											"value": "@pipeline().parameters.p_SourceTable",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "SP_Update_Watermark",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "CPY_SQL_TO_BRONZE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[etl].[UpdateWatermark]",
+								"storedProcedureParameters": {
+									"ConfigId": {
+										"value": {
+											"value": "@pipeline().parameters.p_ConfigId",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"NewWatermarkValue": {
+										"value": {
+											"value": "@pipeline().parameters.p_LastWatermarkValue",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_SQL_DB",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_ConfigId": {
+				"type": "int"
+			},
+			"p_SourceSchema": {
+				"type": "string"
+			},
+			"p_SourceTable": {
+				"type": "string"
+			},
+			"p_WatermarkColumn": {
+				"type": "string"
+			},
+			"p_LastWatermarkValue": {
+				"type": "string"
+			},
+			"p_TargetFolder": {
+				"type": "string"
+			}
+		},
+		"annotations": []
+	}
+}
