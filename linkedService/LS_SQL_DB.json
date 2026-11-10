@@ -1,0 +1,17 @@
+{
+	"name": "LS_SQL_DB",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "mvservernew.database.windows.net",
+			"database": "mvadmin",
+			"encrypt": "mandatory",
+			"trustServerCertificate": true,
+			"authenticationType": "SQL",
+			"userName": "mvadmin",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQENCMEJCNjI0LTlGODQtNENBQi04RUQyLUMzRjEyMTJGRkNCOF8yMmNlMDMwZi02ZGQ3LTQ5MTYtOTIxNi1mYWUxNzU3MTc5MzkiDQp9"
+		}
+	}
+}
